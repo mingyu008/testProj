@@ -120,4 +120,30 @@ class OrderProcessServiceTest {
         assertTrue(message.contains("배송메모"));
         assertTrue(message.contains("허용 용량은 200 byte입니다"));
     }
+
+    @Test
+    @DisplayName("실패 케이스: 빌더에 add 된 필수 필드(productName)가 누락되면 명확한 한글 라벨명과 함께 구조 오류를 던진다")
+    void processIncomingOrderJson_Fail_LabelSpecificationMissing() {
+        // Given: 빌더에는 명시되어 있지만 JSON에는 'productName'이 누락됨
+        String invalidJson = """
+        {
+            "orderId": "ORD-2026-0713",
+            "receiverName": "홍길동",
+            "deliveryMemo": "안전 배송 바랍니다."
+        }
+        """;
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> orderProcessService.processIncomingOrderJson(invalidJson)
+        );
+
+        String message = exception.getMessage();
+        System.out.println("🔥 출력된 구조 에러 메시지: " + message);
+
+        // 'productName' 대신 빌더에 매핑해 둔 한글 라벨 '상품명'이 메시지에 박히는지 검증합니다.
+        assertTrue(message.contains("필수 입력 항목이 JSON 데이터에서 누락되었습니다"));
+        assertTrue(message.contains("상품명"));
+    }
 }

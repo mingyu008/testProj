@@ -16,16 +16,22 @@ public class OrderRequestDto {
     private String deliveryMemo;
 
     /**
-     * DTO 내부 필드의 정합성을 스스로 체크하는 함수
+     * 💡 핵심: 구조만 먼저 추출하거나 검증을 수행할 공통 빌더 인스턴스 생성 매핑
+     */
+    public LengthValidator getValidatorSpecification() {
+        return new LengthValidator()
+                // .add("필드변수명", "한글라벨", 값, 최소, 최대)
+                .add("orderId", "주문번호", this.orderId, 10, 20)
+                .add("productName", "상품명", this.productName, 1, 100)
+                .add("receiverName", "수령인", this.receiverName, 2, 10)
+                .addByteCheck("deliveryMemo", "배송메모", this.deliveryMemo, 200);
+        // phoneNumber는 비필수 타겟이라 치고 제외하면 자동으로 구조 대조에서도 빠집니다!
+    }
+
+    /**
+     * 기존에 서비스가 호출하던 검증 메서드
      */
     public void validate() {
-        new LengthValidator()
-                .add("주문번호", this.orderId, 10, 20)
-                .add("상품명", this.productName, 1, 100)
-//                .add("수령인", this.receiverName, 2, 10)
-                .addByteCheck("수령인", this.receiverName, 30)
-                .add("전화번호", this.phoneNumber, 10, 11)
-                .add("배송메모", this.deliveryMemo, 0, 200)
-                .execute();
+        getValidatorSpecification().execute();
     }
 }

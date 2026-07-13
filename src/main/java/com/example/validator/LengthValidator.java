@@ -1,10 +1,12 @@
 package com.example.validator;
 
 import lombok.NoArgsConstructor;
-
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor
@@ -12,7 +14,15 @@ public class LengthValidator {
     private final List<Runnable> checks = new ArrayList<>();
     private final List<String> errorMessages = new ArrayList<>();
 
-    public LengthValidator add(String label, String value, int min, int max) {
+    // 💡 [추가] 등록된 필드들의 변수명(Key)과 설명(Label)을 저장하는 맵
+    private final Map<String, String> registeredFields = new HashMap<>();
+
+    /**
+     * 기존 검증 함수 확장 (필드 변수명인 fieldKey를 추가로 받습니다)
+     */
+    public LengthValidator add(String fieldKey, String label, String value, int min, int max) {
+        registeredFields.put(fieldKey, label); // 구조 비교용 데이터 수집
+
         checks.add(() -> {
             if (value == null) return;
             int len = value.length();
@@ -24,20 +34,29 @@ public class LengthValidator {
     }
 
     /**
-     * 추가: 바이트 수(Byte) 기반 최대치 검증 (UTF-8 기준)
+     * 바이트 체크 함수 확장
      */
-    public LengthValidator addByteCheck(String label, String value, int maxByte) {
+    public LengthValidator addByteCheck(String fieldKey, String label, String value, int maxByte) {
+        registeredFields.put(fieldKey, label);
+
         checks.add(() -> {
             if (value == null) return;
-
-            // UTF-8 기준으로 문자열을 바이트 배열로 변환하여 길이 측정
             int byteLength = value.getBytes(StandardCharsets.UTF_8).length;
-
             if (byteLength > maxByte) {
                 errorMessages.add(String.format("[%s]의 허용 용량은 %d byte입니다. (현재 입력: %d byte)", label, maxByte, byteLength));
             }
         });
         return this;
+    }
+
+    // 💡 [추가] 현재 빌더에 등록된 필드 목록(영어 변수명)을 반환하는 메서드
+    public Set<String> getTargetFields() {
+        return registeredFields.keySet();
+    }
+
+    // 💡 [추가] 변수명에 해당하는 한글 라벨을 반환하는 메서드 (에러 메시지용)
+    public String getLabel(String fieldKey) {
+        return registeredFields.getOrDefault(fieldKey, fieldKey);
     }
 
     public void execute() {
