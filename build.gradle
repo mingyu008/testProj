@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'org.sample'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+// 1. Spring Boot 기본 및 Web
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // 스프링 부트 테스트 스타터 (JUnit 5가 기본 포함되어 있습니다)
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // 2. MyBatis 설정 (Spring Boot용 공식 스타터 라이브러리)
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+
+    // 3. H2 데이터베이스 (메모리 DB)
+    runtimeOnly 'com.h2database:h2'
+
+    // 4. Lombok 설정
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // 5. MapStruct 및 바인딩 설정
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+}
+
+test {
+    useJUnitPlatform()
+}
